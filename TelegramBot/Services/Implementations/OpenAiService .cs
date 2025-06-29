@@ -24,7 +24,9 @@ public class OpenAiService : IOpenAiService
         {
             var messages = new List<ChatMessage>
             {
-                new SystemChatMessage("Ти помічник і експерт зі страхування в Україні. Відповідай на питання користувачів чітко та інформативно українською мовою."),
+                new SystemChatMessage("Ти помічник і експерт зі страхування в Україні. " +
+                "Використовуй тільки найновішу нормативно - правову базу Українию" +
+                "Відповідай на питання користувачів чітко та інформативно українською мовою."),
                 new UserChatMessage(question)
             };
             var options = new ChatCompletionOptions { Temperature = 0.7f };
