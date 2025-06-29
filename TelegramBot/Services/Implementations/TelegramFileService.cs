@@ -48,11 +48,10 @@ namespace TelegramBot.Services.Implementations
             }
         }
 
-        [Obsolete]
+
         public string CreatePdfFromImages(string firstImagePath, string secondImagePath)
         {
             var pdfPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.pdf");
-
             using var document = new PdfDocument();
 
             foreach (var imgPath in new[] { firstImagePath, secondImagePath })
@@ -61,19 +60,26 @@ namespace TelegramBot.Services.Implementations
                     throw new FileNotFoundException("Image file not found", imgPath);
 
                 var page = document.AddPage();
-
                 using var xImage = XImage.FromFile(imgPath);
 
-                page.Width = xImage.PointWidth;
-                page.Height = xImage.PointHeight;
+                page.Width = XUnit.FromPoint(xImage.PointWidth);
+                page.Height = XUnit.FromPoint(xImage.PointHeight);
 
                 using var gfx = XGraphics.FromPdfPage(page);
-                gfx.DrawImage(xImage, 0, 0, page.Width, page.Height);
+
+                gfx.DrawImage(
+                    xImage,
+                    0,
+                    0,
+                    xImage.PointWidth,
+                    xImage.PointHeight
+                );
             }
 
             document.Save(pdfPath);
             return pdfPath;
         }
+
 
         public void DeleteSessionFiles(UserSession session)
         {

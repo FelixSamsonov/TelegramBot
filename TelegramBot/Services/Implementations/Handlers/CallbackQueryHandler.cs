@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Models;
+using TelegramBot.Services.Abs;
 using TelegramBot.Services.Abstractions;
 
 namespace TelegramBot.Services.Implementations.Handlers
@@ -9,13 +10,22 @@ namespace TelegramBot.Services.Implementations.Handlers
     {
         private readonly ITelegramBotClient _botClient;
         private readonly ICompletionService _completionService;
+        private readonly IUserSessionService _userSessionService;
+        private readonly IChatHistoryService _chatHistoryService;
+        private readonly IMenuService _menuService;
 
         public CallbackQueryHandler(
             ITelegramBotClient botClient,
-            ICompletionService completionService)
+            ICompletionService completionService,
+            IUserSessionService userSessionService,
+            IChatHistoryService chatHistoryService,
+            IMenuService menuService)
         {
             _botClient = botClient;
             _completionService = completionService;
+            _userSessionService = userSessionService;
+            _chatHistoryService = chatHistoryService;
+            _menuService = menuService;
         }
 
         public async Task HandleAsync(CallbackQuery query, UserSession session, CancellationToken cancellationToken)
@@ -99,7 +109,10 @@ namespace TelegramBot.Services.Implementations.Handlers
 
                 case "confirm_price":
                     await _completionService.FinalizePolicyAsync(session, cancellationToken);
+                    await _chatHistoryService.ClearHistoryAsync(session, cancellationToken);
+                    _userSessionService.ResetSession(session.ChatId);
                     break;
+
 
                 case "decline_price":
                     session.CurrentState = DocumentState.AwaitingSelection;

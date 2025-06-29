@@ -14,17 +14,20 @@ namespace TelegramBot.Services.Implementations.Handlers
         private readonly IOpenAiService _openAiService;
         private readonly IMenuService _menuService;
         private readonly IChatHistoryService _chatHistoryService;
+        private readonly IUserSessionService _userSessionService;
 
         public TextMessageHandler(
             ITelegramBotClient botClient,
             IOpenAiService openAiService,
             IMenuService menuService,
-            IChatHistoryService chatHistoryService)
+            IChatHistoryService chatHistoryService,
+            IUserSessionService userSessionService )
         {
             _botClient = botClient;
             _openAiService = openAiService;
             _menuService = menuService;
             _chatHistoryService = chatHistoryService;
+            _userSessionService = userSessionService;
         }
 
         public async Task HandleAsync(Message message, UserSession session, CancellationToken cancellationToken)
@@ -57,6 +60,10 @@ namespace TelegramBot.Services.Implementations.Handlers
             switch (text.ToLower())
             {
                 case "/start":
+                    _userSessionService.ResetSession(session.ChatId);
+                    session = _userSessionService.GetOrCreateSession(session.ChatId);
+
+                    await _chatHistoryService.ClearHistoryAsync(session, cancellationToken);
                     var startMessage = "Привіт! Я ваш помічник для оформлення автосрахування." +
                         " 🚗\r\n\r\nМоя мета — допомогти вам швидко та зручно оформити страховий поліс для вашого транспортного засобу." +
                         " Просто надішліть необхідні документи, і я все зроблю за вас!";

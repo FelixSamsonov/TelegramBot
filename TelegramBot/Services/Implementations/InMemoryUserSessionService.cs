@@ -14,7 +14,5 @@ public class InMemoryUserSessionService : IUserSessionService
     }
 
     public void ResetSession(long chatId)
-    {
-        _sessions[chatId] = new UserSession();
-    }
+     => _sessions[chatId] = new UserSession { ChatId = chatId };
 }
